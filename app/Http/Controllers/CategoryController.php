@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -11,7 +12,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::paginate(1); 
+        $categories = Category::paginate(config('common.paginate_per_page')); 
         return Inertia::render('Categories/Index', [
             'categories' => $categories,
         ]);
@@ -24,9 +25,9 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['description' => 'required|string|max:255']);
+        $request->validate(['name' => 'required|string|max:255']);
         Category::create([
-            'description' => $request->description,
+            'name'       => $request->name,
             'created_by' => auth()->id(),
         ]);
 
@@ -42,9 +43,9 @@ class CategoryController extends Controller
 
     public function update(Request $request, Category $category)
     {
-        $request->validate(['description' => 'required|string|max:255']);
+        $request->validate(['name' => 'required|string|max:255']);
         $category->update([
-            'description' => $request->description,
+            'name'       => $request->name,
             'updated_by' => auth()->id(),
         ]);
 

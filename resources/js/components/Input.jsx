@@ -14,7 +14,8 @@ const Input = ({
     rounded = 'rounded-lg',
     shadow = 'shadow-sm',
     focusRing = 'focus:ring-2 focus:ring-blue-400 focus:border-transparent',
-    error = '', // New prop for error message
+    error = '', 
+    disabled = false, 
 }) => {
 
     const inputClass = 
@@ -27,8 +28,8 @@ const Input = ({
         focusRing + 
         " transition-all " + 
         className + 
-        (error ? " border-red-500" : "");
-  
+        (error ? " border-red-500" : "") + 
+        (disabled ? " opacity-50 cursor-not-allowed" : ""); 
 
     return (
         <div className="mb-4"> 
@@ -40,6 +41,7 @@ const Input = ({
                 onChange={onChange}
                 placeholder={placeholder}
                 className={inputClass}
+                disabled={disabled} // Apply disabled attribute
             />
             {error && <p className="text-sm text-red-500">{error}</p>} 
         </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from './Button'; 
+import Button from './Button';
 
 const Modal = ({ 
     isOpen, 
@@ -8,7 +8,9 @@ const Modal = ({
     title, 
     message, 
     buttonText = "Confirm",  
-    buttonColor = "bg-primary-theme-color"
+    buttonColor = "bg-primary-theme-color",
+    buttonDisabled = false,
+    children 
 }) => {
     if (!isOpen) return null;
 
@@ -23,7 +25,17 @@ const Modal = ({
                 </button>
 
                 <h2 className="text-lg font-bold mb-4">{title}</h2>
-                <p className="text-gray-700 dark:text-white mb-6">{message}</p>
+
+                {message && (
+                    <p className="text-gray-700 dark:text-white mb-6">{message}</p>
+                )}
+
+                {children && (
+                    <div className="mb-6">
+                        {children}
+                    </div>
+                )}
+
                 <div className="flex justify-end space-x-3">
                     <Button
                         onClick={onClose}
@@ -34,6 +46,7 @@ const Modal = ({
                     <Button
                         onClick={onConfirm}
                         bgColor={buttonColor}
+                        disabled={buttonDisabled}
                     >
                         {buttonText}
                     </Button>

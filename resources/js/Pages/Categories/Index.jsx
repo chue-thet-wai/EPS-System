@@ -2,14 +2,21 @@ import React, { useState, useCallback } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import { Link, Table, Modal, ButtonIcon } from '../../components';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { usePage } from '@inertiajs/inertia-react';
+import { usePermissions } from '../../utils/usePermissions';
 
 const Index = ({ categories }) => {
+    const { props } = usePage();
+    const userPermissions = props.auth?.permissions || [];
+
     const [isModalOpen, setModalOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState(null);
 
+    const { checkMenuPermissions } = usePermissions(userPermissions);
+    const { canCreate, canEdit, canDelete, canExport } = checkMenuPermissions('Categories');
+
     const columns = React.useMemo(() => [
-        { header: 'ID', field: 'id' },
-        { header: 'Description', field: 'description' },
+        { header: 'Name', field: 'name' },
     ], []);
 
     const handleDeleteClick = useCallback((id) => {
@@ -30,24 +37,29 @@ const Index = ({ categories }) => {
 
     const RowActions = ({ rowId }) => (
         <>
-            <ButtonIcon
-                href="/categories/1/edit"
-                icon={<FaEdit />}
-                iconColor="text-blue-500"
-                hoverColor="hover:text-blue-700"
-                tooltip="Edit"
-                size="lg"
-                shadow={true}
-            />
-            <ButtonIcon
-                onClick={() => handleDeleteClick(rowId)}
-                icon={<FaTrash />}
-                iconColor="text-red-500"
-                hoverColor="hover:text-red-700"
-                tooltip="Delete"
-                size="lg"
-                shadow={true}
-            />
+            {canEdit && (
+                <ButtonIcon
+                    href={`/categories/${rowId}/edit`}
+                    icon={<FaEdit />}
+                    iconColor="text-blue-500"
+                    hoverColor="hover:text-blue-700"
+                    tooltip="Edit"
+                    size="lg"
+                    shadow={true}
+                />
+            )}
+            {canDelete && (
+                <ButtonIcon
+                    onClick={() => handleDeleteClick(rowId)}
+                    icon={<FaTrash />}
+                    iconColor="text-red-500"
+                    hoverColor="hover:text-red-700"
+                    tooltip="Delete"
+                    size="lg"
+                    shadow={true}
+                />
+            )}
+
         </>
     );
 
@@ -55,7 +67,9 @@ const Index = ({ categories }) => {
         <div className="container mx-auto p-5 mt-5">
             <div className="flex justify-between items-center mb-5">
                 <h1 className="text-3xl font-bold dark:text-white">Categories</h1>
-                <Link href="/categories/create">Add Category</Link>
+                {canCreate && (
+                    <Link href="/categories/create">Add Category</Link>
+                )}
             </div>
 
             <Table

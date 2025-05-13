@@ -6,7 +6,7 @@ const FileInput = ({ id, name, label, value, onChange, error, required = false, 
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setPreview(previewImage ? URL.createObjectURL(file) : null); // Only set preview if it's an image
+            setPreview(previewImage ? URL.createObjectURL(file) : null);
         } else {
             setPreview(null);
         }
@@ -15,14 +15,12 @@ const FileInput = ({ id, name, label, value, onChange, error, required = false, 
 
     return (
         <div>
-            {/* Label */}
             {label && (
                 <label htmlFor={id} className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {label} {required && <span className="text-red-500">*</span>}
                 </label>
             )}
 
-            {/* File Input */}
             <input
                 type="file"
                 id={id}

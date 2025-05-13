@@ -1,5 +1,3 @@
-import React from "react";
-
 const Table = ({ columns, tableData, onPageChange, actions = null }) => {
     if (!tableData || !tableData.data) {
         return <div>Loading...</div>;
@@ -11,62 +9,72 @@ const Table = ({ columns, tableData, onPageChange, actions = null }) => {
         }
     };
 
+    const getNestedValue = (obj, field) => {
+        return field.split('.').reduce((acc, part) => (acc ? acc[part] : ''), obj);
+    };
+
     return (
         <div className="overflow-x-auto mt-5">
             <div className="shadow-lg rounded-lg overflow-hidden bg-white dark:bg-secondary-dark-bg dark:text-white">
-                {/* Table */}
-                <table className="min-w-full table-auto border-collapse">
-                    <thead className="bg-primary-theme-color text-white">
-                        <tr>
-                            {columns.map((col, index) => (
-                                <th
-                                    key={index}
-                                    className="px-4 py-3 text-left border-b border-gray-300"
-                                >
-                                    {col.header}
-                                </th>
-                            ))}
-                            {actions && (
-                                <th className="px-4 py-3 text-left border-b border-gray-300">
-                                    Actions
-                                </th>
-                            )}
-                        </tr>
-                    </thead>
-                    <tbody className="text-gray-700 dark:text-white">
-                        {tableData.data.length === 0 ? (
-                            // No Data Message
+                <div className="w-full overflow-x-auto custom-scroll">
+                    <table className="min-w-full xs:min-w-[600px] table-auto border-collapse">
+                        <thead className="bg-primary-theme-color text-white">
                             <tr>
-                                <td
-                                    colSpan={columns.length + (actions ? 1 : 0)}
-                                    className="text-center py-4 text-gray-500 dark:text-gray-400"
-                                >
-                                    No data available
-                                </td>
+                                <th className="px-4 py-3 text-left border-b border-gray-300">#</th>
+                                {columns.map((col, index) => (
+                                    <th
+                                        key={index}
+                                        className="px-4 py-3 text-left border-b border-gray-300"
+                                    >
+                                        {col.header}
+                                    </th>
+                                ))}
+                                {actions && (
+                                    <th className="px-4 py-3 text-left border-b border-gray-300">
+                                        Actions
+                                    </th>
+                                )}
                             </tr>
-                        ) : (
-                            tableData.data.map((row, rowIndex) => (
-                                <tr
-                                    key={rowIndex}
-                                    className={`hover:bg-gray-100 dark:hover:bg-gray-500 ${
-                                        rowIndex === tableData.data.length - 1 ? "" : "border-b border-gray-200"
-                                    }`}
-                                >
-                                    {columns.map((col, colIndex) => (
-                                        <td key={colIndex} className="px-4 py-2">
-                                            {col.render ? col.render(row) : row[col.field]}
-                                        </td>
-                                    ))}
-                                    {actions && (
-                                        <td className="px-4 py-2 text-right flex gap-2">
-                                            {actions(row)}
-                                        </td>
-                                    )}
+                        </thead>
+                        <tbody className="text-gray-700 dark:text-white">
+                            {tableData.data.length === 0 ? (
+                                <tr>
+                                    <td
+                                        colSpan={columns.length + (actions ? 1 : 0)}
+                                        className="text-center py-4 text-gray-500 dark:text-gray-400"
+                                    >
+                                        No data available
+                                    </td>
                                 </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                            ) : (
+                                tableData.data.map((row, rowIndex) => (
+                                    <tr
+                                        key={rowIndex}
+                                        className={`hover:bg-gray-200 dark:hover:bg-gray-500 ${
+                                            rowIndex === tableData.data.length - 1 ? "" : "border-b border-gray-200"
+                                        }`}
+                                    >
+                                        <td className="px-4 py-2">
+                                            {tableData.from + rowIndex}
+                                        </td>           
+                                        {columns.map((col, colIndex) => (
+                                            <td key={colIndex} className="px-4 py-2">
+                                                {col.render
+                                                    ? col.render(row)
+                                                    : getNestedValue(row, col.field) || ""}
+                                            </td>
+                                        ))}
+                                        {actions && (
+                                            <td className="px-4 py-2 text-right flex gap-2">
+                                                {actions(row)}
+                                            </td>
+                                        )}
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
                 {/* Pagination */}
                 {tableData.last_page > 1 && (

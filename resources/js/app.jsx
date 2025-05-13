@@ -2,8 +2,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/inertia-react';
 import { InertiaProgress } from '@inertiajs/progress';
-import Main from './Pages/Layouts/Main';
-import Gest from './Pages/Layouts/Gest'; // Import Gest layout
+import AdminMain from './Pages/Layouts/AdminMain'; 
+import AdminGuest from './Pages/Layouts/AdminGuest'; 
 import { ContextProvider } from './contexts/ContextProvider';
 
 InertiaProgress.init();
@@ -21,13 +21,12 @@ createInertiaApp({
 
             const module = await page();
 
-            // Apply layouts dynamically
-            // Use Gest layout for specific unauthenticated pages
             if (['Auth/Login', 'Auth/Register'].includes(name)) {
-                module.default.layout = (page) => <Gest>{page}</Gest>;
+                module.default.layout = (page) =>
+                    <AdminGuest>{page}</AdminGuest>;
             } else {
-                // Use Main layout by default if no layout is explicitly set
-                module.default.layout ??= (page) => <Main>{page}</Main>;
+                module.default.layout = (page) =>
+                    <AdminMain>{page}</AdminMain>;
             }
 
             return module;

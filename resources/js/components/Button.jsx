@@ -13,6 +13,7 @@ const Button = ({
   bgColor = '',
   hoverColor = '',
   focusColor = 'focus:ring-primary-theme-color',
+  disabled = false,  // Add disabled prop
 }) => {
   
   const variantStyles = {
@@ -34,6 +35,10 @@ const Button = ({
   const finalTextColor = textColor || defaultTextColor;
   const finalHoverColor = hoverColor || defaultHoverColor;
 
+  const disabledStyles = disabled
+    ? 'bg-gray-400 text-gray-600 cursor-not-allowed hover:bg-gray-400'
+    : '';
+
   const baseStyles = `
     flex items-center justify-center
     ${padding}
@@ -49,13 +54,15 @@ const Button = ({
     transition
     ease-in-out
     duration-150
+    ${disabledStyles} 
   `;
 
   return (
     <button
       type={type}
-      onClick={onClick}
+      onClick={disabled ? null : onClick}  
       className={baseStyles + " " + className}
+      disabled={disabled}  
     >
       {children}
     </button>

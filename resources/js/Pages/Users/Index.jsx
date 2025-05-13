@@ -2,13 +2,20 @@ import React, { useState, useCallback } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import { Link, Table, Modal, ButtonIcon } from '../../components';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { usePage } from '@inertiajs/inertia-react';
+import { usePermissions } from '../../utils/usePermissions';
 
 const Index = ({ users }) => {
+    const { props } = usePage();
+    const userPermissions = props.auth?.permissions || [];
+
     const [isModalOpen, setModalOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
 
+    const { checkMenuPermissions } = usePermissions(userPermissions);
+    const { canCreate, canEdit, canDelete, canExport } = checkMenuPermissions('Users');
+
     const columns = React.useMemo(() => [
-        { header: 'ID', field: 'id' },
         { header: 'Name', field: 'name' },
         { header: 'Email', field: 'email' },
         { header: 'Role', field: 'role' },
@@ -32,24 +39,28 @@ const Index = ({ users }) => {
 
     const RowActions = ({ rowId }) => (
         <>
-            <ButtonIcon
-                href="/users/1/edit"
-                icon={<FaEdit />}
-                iconColor="text-blue-500"
-                hoverColor="hover:text-blue-700"
-                tooltip="Edit"
-                size="lg"
-                shadow={true}
-            />
-            <ButtonIcon
-                onClick={() => handleDeleteClick(rowId)}
-                icon={<FaTrash />}
-                iconColor="text-red-500"
-                hoverColor="hover:text-red-700"
-                tooltip="Delete"
-                size="lg"
-                shadow={true}
-            />
+            {canEdit && (
+                <ButtonIcon
+                    href={`/users/${rowId}/edit`}
+                    icon={<FaEdit />}
+                    iconColor="text-blue-500"
+                    hoverColor="hover:text-blue-700"
+                    tooltip="Edit"
+                    size="lg"
+                    shadow={true}
+                />
+            )}
+            {canDelete && (
+                <ButtonIcon
+                    onClick={() => handleDeleteClick(rowId)}
+                    icon={<FaTrash />}
+                    iconColor="text-red-500"
+                    hoverColor="hover:text-red-700"
+                    tooltip="Delete"
+                    size="lg"
+                    shadow={true}
+                />
+            )}
         </>
     );
 
@@ -57,7 +68,9 @@ const Index = ({ users }) => {
         <div className="container mx-auto p-5 mt-5">
             <div className="flex justify-between items-center mb-5">
                 <h1 className="text-3xl font-bold dark:text-white">Users</h1>
-                <Link href="/users/create">Add User</Link>
+                {canCreate && (
+                    <Link href="/users/create">Add User</Link>
+                )}
             </div>
 
             <Table

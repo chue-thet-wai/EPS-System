@@ -5,7 +5,7 @@ import { FormWrapper, Label, Input, Button } from '../../components';
 const RoleForm = ({ role = null, permissions = [] }) => {
     const [formData, setFormData] = useState({
         name: role ? role.name : '',
-        permissions: role && role.permissions ? role.permissions.map(p => p.id) : [], 
+        permissions: role && role.permissions ? role.permissions.map(p => p.id) : [],
     });
 
     const [errors, setErrors] = useState({});
@@ -15,7 +15,7 @@ const RoleForm = ({ role = null, permissions = [] }) => {
         const { name, value, type, checked } = e.target;
     
         if (type === 'checkbox') {
-            const permissionId = parseInt(value, 10); // Ensure value is a number
+            const permissionId = parseInt(value, 10);
             setFormData((prevData) => {
                 const newPermissions = checked
                     ? [...prevData.permissions, permissionId]
@@ -23,45 +23,49 @@ const RoleForm = ({ role = null, permissions = [] }) => {
     
                 return {
                     ...prevData,
-                    permissions: newPermissions, // Update permissions
+                    permissions: newPermissions,
                 };
             });
         } else {
             setFormData((prevData) => ({
                 ...prevData,
-                [name]: value, // Update other fields (like role name)
+                [name]: value, 
             }));
         }
     };
-    
 
-    // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Clear previous errors and start processing state
         setErrors({});
         setProcessing(true);
 
-        // Submit request based on create or edit mode
         const action = role ? 'put' : 'post';
         const url = role ? `/roles/${role.id}` : '/roles';
 
         Inertia[action](url, formData, {
             onError: (errors) => {
-                setErrors(errors); // Set backend validation errors
-                setProcessing(false); // Stop processing on error
+                setErrors(errors); 
+                setProcessing(false); 
             },
             onSuccess: () => {
-                Inertia.visit('/roles'); // Redirect on success
-                setProcessing(false); // Stop processing on success
+                Inertia.visit('/roles');
+                setProcessing(false); 
             },
         });
     };
 
-    // Group permissions by menu and action
-    const groupedPermissions = permissions.reduce((acc, permission) => {
-        const [action, menu] = permission.name.split('_');
+    // Filter permissions starting with certain titles
+    const actionsFilter = ['View', 'Create', 'Edit', 'Delete', 'Export'];
+
+    const filteredPermissions = permissions.filter((permission) => {
+        return actionsFilter.some((action) => permission.name.startsWith(action));
+    });
+
+    const groupedPermissions = filteredPermissions.reduce((acc, permission) => {
+        const [action, ...menuParts] = permission.name.split(' '); 
+        const menu = menuParts.join(' '); 
+    
         if (!acc[menu]) {
             acc[menu] = [];
         }
@@ -69,8 +73,7 @@ const RoleForm = ({ role = null, permissions = [] }) => {
         return acc;
     }, {});
 
-    // All possible actions (can be customized based on your system)
-    const actions = ['list', 'create', 'edit', 'delete', 'download'];
+    const actions = ['View', 'Create', 'Edit', 'Delete', 'Export'];  
 
     return (
         <div className="m-10">
@@ -111,9 +114,8 @@ const RoleForm = ({ role = null, permissions = [] }) => {
                                         const permission = groupedPermissions[menu].find(
                                             (perm) => perm.action === action
                                         );
-                                        if (!permission) return null;
+                                        if (!permission) return <td key={action}></td>; 
 
-                                        // Check if the permission.id is in formData.permissions (array)
                                         const isChecked = formData.permissions.includes(permission.id);
 
                                         return (
@@ -121,13 +123,12 @@ const RoleForm = ({ role = null, permissions = [] }) => {
                                                 <input
                                                     type="checkbox"
                                                     name="permissions"
-                                                    value={permission.id} // Use the numeric ID directly
-                                                    checked={formData.permissions.includes(permission.id)} // Boolean state for checked
+                                                    value={permission.id} 
+                                                    checked={isChecked} 
                                                     onChange={handleChange}
                                                     disabled={processing}
                                                     className="h-5 w-5 text-blue-500 border-gray-300 rounded"
                                                 />
-
                                             </td>
                                         );
                                     })}
@@ -144,7 +145,7 @@ const RoleForm = ({ role = null, permissions = [] }) => {
                     <Button
                         onClick={() => Inertia.visit('/roles')}
                         variant="secondary"
-                        disabled={processing} // Disable during processing
+                        disabled={processing}
                     >
                         Cancel
                     </Button>

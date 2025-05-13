@@ -2,24 +2,28 @@ import React, { useState, useCallback } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import { Link, Table, Modal, ButtonIcon } from '../../components';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { usePage } from '@inertiajs/inertia-react';
+import { usePermissions } from '../../utils/usePermissions';
 
 const RoleIndex = ({ roles }) => {
+    const { props } = usePage();
+    const userPermissions = props.auth?.permissions || [];
+
     const [isModalOpen, setModalOpen] = useState(false);
     const [roleToDelete, setRoleToDelete] = useState(null);
 
-    // Define table columns for roles
     const columns = React.useMemo(() => [
-        { header: 'ID', field: 'id' },
         { header: 'Name', field: 'name' },
     ], []);
 
-    // Handle delete modal opening
+    const { checkMenuPermissions } = usePermissions(userPermissions);
+    const { canCreate, canEdit, canDelete, canExport } = checkMenuPermissions('Roles');
+
     const handleDeleteClick = useCallback((id) => {
         setRoleToDelete(id);
         setModalOpen(true);
     }, []);
 
-    // Perform role deletion
     const handleDelete = useCallback(() => {
         if (roleToDelete) {
             Inertia.delete(`/roles/${roleToDelete}`, {
@@ -31,27 +35,30 @@ const RoleIndex = ({ roles }) => {
         }
     }, [roleToDelete]);
 
-    // Row actions (Edit and Delete)
     const RowActions = ({ rowId }) => (
         <>
-            <ButtonIcon
-                href={`/roles/${rowId}/edit`}
-                icon={<FaEdit />}
-                iconColor="text-blue-500"
-                hoverColor="hover:text-blue-700"
-                tooltip="Edit"
-                size="lg"
-                shadow={true}
-            />
-            <ButtonIcon
-                onClick={() => handleDeleteClick(rowId)}
-                icon={<FaTrash />}
-                iconColor="text-red-500"
-                hoverColor="hover:text-red-700"
-                tooltip="Delete"
-                size="lg"
-                shadow={true}
-            />
+            {canEdit && (
+                <ButtonIcon
+                    href={`/roles/${rowId}/edit`}
+                    icon={<FaEdit />}
+                    iconColor="text-blue-500"
+                    hoverColor="hover:text-blue-700"
+                    tooltip="Edit"
+                    size="lg"
+                    shadow={true}
+                />
+            )}
+            {canDelete && (
+                <ButtonIcon
+                    onClick={() => handleDeleteClick(rowId)}
+                    icon={<FaTrash />}
+                    iconColor="text-red-500"
+                    hoverColor="hover:text-red-700"
+                    tooltip="Delete"
+                    size="lg"
+                    shadow={true}
+                />
+            )}
         </>
     );
 
@@ -59,7 +66,9 @@ const RoleIndex = ({ roles }) => {
         <div className="container mx-auto p-5 mt-5">
             <div className="flex justify-between items-center mb-5">
                 <h1 className="text-3xl font-bold dark:text-white">Roles</h1>
-                <Link href="/roles/create" className="btn btn-primary">Add Role</Link>
+                {canCreate && (
+                    <Link href="/roles/create" className="btn btn-primary">Add Role</Link>
+                )}
             </div>
 
             <Table
