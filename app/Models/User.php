@@ -22,6 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'last_login_at'
     ];
 
     /**
@@ -47,5 +48,10 @@ class User extends Authenticatable
     public function customer()
     {
         return $this->hasOne(Customer::class);
+    }
+
+    public function agent()
+    {
+        return $this->hasOne(Agent::class);
     }
 }

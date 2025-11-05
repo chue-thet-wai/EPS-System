@@ -2,65 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agent;
 use App\Models\Category;
 use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ServiceController extends Controller
 {
     public function index()
     {
         $authUser = auth()->user();
-        $services = Service::with('user', 'category')
-                    ->where('created_by',$authUser->id)
-                    ->paginate(config('common.paginate_per_page'));
-        return Inertia::render('Services/Index', compact('services'));
-    }
+        $agentInfo = Agent::with('user')->where('user_id', $authUser->id)->first(); 
 
-    public function create()
-    {
-        $authUser = auth()->user();
+        $services = Service::with(['user', 'category', 'subcategory'])
+            ->where('created_by', $authUser->id)
+            ->paginate(config('common.paginate_per_page'));
 
-        if (checkUserRole('Agent', $authUser)) {
-            $users = collect([$authUser]);
-        } elseif (checkUserRole('Admin', $authUser)) {
-            $users = User::role('Agent')->get();
-        } else {
-            $users = collect();
-        }
-
-        $categories = Category::all();
-
-        return Inertia::render('Services/Form', [
-            'users' => $users,
-            'categories' => $categories,
+        return Inertia::render('Services/Index', [
+            'agent' => $agentInfo,
+            'services' => $services,
             'statuses' => config('common.statuses'),
+            'pageTitle' => 'allServices'
         ]);
     }
 
 
+    public function create()
+    {
+        $categories = Category::with('subcategories')->get();
+
+        return Inertia::render('Services/Form', [
+            'categories' => $categories,
+            'statuses' => config('common.statuses'),
+            'pageTitle' => 'createService'
+        ]);
+    }
+    
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'remark' => 'nullable|string',
+            'detail' => 'nullable|string',
+            'duration' => 'nullable|string',
+            'cost' => 'nullable|string',
+           // 'is_renew' => 'boolean',
             'status' => 'required|in:0,1',
         ]);
 
         Service::create([
-            'agent_id' => $request->user_id,
             'category_id' => $request->category_id,
+            'subcategory_id' => $request->subcategory_id,
             'title' => $request->title,
-            'description' => $request->description,
-            'remark' => $request->remark,
+            'detail' => $request->detail,
+            'duration' => $request->duration,
+            'cost' => $request->cost,
+           // 'is_renew' => $request->is_renew ?? false,
             'status' => $request->status,
-            'created_by' => Auth::id(),
+            'created_by' => Auth::id(), 
         ]);
 
         return redirect()->route('services.index')->with('success', 'Service created successfully.');
@@ -68,31 +72,36 @@ class ServiceController extends Controller
 
     public function edit(Service $service)
     {
+        $categories = Category::with('subcategories')->get();
         return Inertia::render('Services/Form', [
             'service' => $service->load('user', 'category'),
-            'users' => \App\Models\User::all(),
-            'categories' => \App\Models\Category::all(),
+            'categories' => $categories,
             'statuses' => config('common.statuses'),
+            'pageTitle' => 'editService'
         ]);
     }
 
     public function update(Request $request, Service $service)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
             'category_id' => 'required|exists:categories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'remark' => 'nullable|string',
+            'detail' => 'nullable|string',
+            'duration' => 'nullable|string',
+            'cost' => 'nullable|string',
+            //'is_renew' => 'boolean',
             'status' => 'required|in:0,1',
         ]);
 
         $service->update([
-            'agent_id' => $request->user_id,
             'category_id' => $request->category_id,
+            'subcategory_id' => $request->subcategory_id,
             'title' => $request->title,
-            'description' => $request->description,
-            'remark' => $request->remark,
+            'detail' => $request->detail,
+            'duration' => $request->duration,
+            'cost' => $request->cost,
+            //'is_renew' => $request->is_renew ?? false,
             'status' => $request->status,
             'updated_by' => Auth::id(),
         ]);

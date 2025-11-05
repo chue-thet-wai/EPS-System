@@ -10,6 +10,7 @@ const ButtonIcon = ({
   tooltip = '', 
   size = 'md', 
   shadow = false, 
+  ...props
 }) => {
   
   const sizeClasses = {
@@ -45,14 +46,14 @@ const ButtonIcon = ({
 
   if (href) {
     return renderWithTooltip(
-      <Link href={href} className={baseStyles}>
+      <Link href={href} className={baseStyles} {...props}>
         {icon}
       </Link>
     );
   }
 
   return renderWithTooltip(
-    <button onClick={onClick} className={baseStyles}>
+    <button onClick={onClick} className={baseStyles} {...props}>
       {icon}
     </button>
   );

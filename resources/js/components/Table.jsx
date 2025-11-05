@@ -1,7 +1,13 @@
+import { useLanguage } from '../contexts/LanguageContext';
+import { translations } from '../utils/lang';
+
 const Table = ({ columns, tableData, onPageChange, actions = null }) => {
     if (!tableData || !tableData.data) {
         return <div>Loading...</div>;
     }
+
+    const { language } = useLanguage();
+    const t = translations[language];
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= tableData.last_page) {
@@ -15,33 +21,33 @@ const Table = ({ columns, tableData, onPageChange, actions = null }) => {
 
     return (
         <div className="overflow-x-auto mt-5">
-            <div className="shadow-lg rounded-lg overflow-hidden bg-white dark:bg-secondary-dark-bg dark:text-white">
+            <div className="shadow-lg overflow-hidden bg-white dark:bg-secondary-dark-bg dark:text-white">
                 <div className="w-full overflow-x-auto custom-scroll">
                     <table className="min-w-full xs:min-w-[600px] table-auto border-collapse">
-                        <thead className="bg-primary-theme-color text-white">
+                        <thead className="bg-primary-theme-color text-black">
                             <tr>
-                                <th className="px-4 py-3 text-left border-b border-gray-300">#</th>
+                                <th className="px-4 py-3 text-left border border-white">#</th>
                                 {columns.map((col, index) => (
                                     <th
                                         key={index}
-                                        className="px-4 py-3 text-left border-b border-gray-300"
+                                        className="px-4 py-3 text-left border border-white"
                                     >
                                         {col.header}
                                     </th>
                                 ))}
                                 {actions && (
-                                    <th className="px-4 py-3 text-left border-b border-gray-300">
-                                        Actions
+                                    <th className="px-4 py-3 text-left border border-white">
+                                        {t.detail}
                                     </th>
                                 )}
                             </tr>
                         </thead>
-                        <tbody className="text-gray-700 dark:text-white">
+                        <tbody className="text-black">
                             {tableData.data.length === 0 ? (
                                 <tr>
                                     <td
-                                        colSpan={columns.length + (actions ? 1 : 0)}
-                                        className="text-center py-4 text-gray-500 dark:text-gray-400"
+                                        colSpan={columns.length + (actions ? 2 : 1)}
+                                        className="text-center py-4 text-black bg-primary-theme-color border border-white"
                                     >
                                         No data available
                                     </td>
@@ -50,22 +56,22 @@ const Table = ({ columns, tableData, onPageChange, actions = null }) => {
                                 tableData.data.map((row, rowIndex) => (
                                     <tr
                                         key={rowIndex}
-                                        className={`hover:bg-gray-200 dark:hover:bg-gray-500 ${
-                                            rowIndex === tableData.data.length - 1 ? "" : "border-b border-gray-200"
+                                        className={`${
+                                            rowIndex % 2 === 0 ? 'bg-secondary-theme-color' : 'bg-primary-theme-color'
                                         }`}
                                     >
-                                        <td className="px-4 py-2">
+                                        <td className="px-4 py-2 border border-white">
                                             {tableData.from + rowIndex}
-                                        </td>           
+                                        </td>
                                         {columns.map((col, colIndex) => (
-                                            <td key={colIndex} className="px-4 py-2">
+                                            <td key={colIndex} className="px-4 py-2 border border-white">
                                                 {col.render
                                                     ? col.render(row)
                                                     : getNestedValue(row, col.field) || ""}
                                             </td>
                                         ))}
                                         {actions && (
-                                            <td className="px-4 py-2 text-right flex gap-2">
+                                            <td className="px-4 py-2 border border-white text-black">
                                                 {actions(row)}
                                             </td>
                                         )}

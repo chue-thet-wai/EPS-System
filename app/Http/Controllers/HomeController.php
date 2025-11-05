@@ -25,7 +25,8 @@ class HomeController extends Controller
         $startOfMonth = $now->copy()->startOfMonth();
 
         $stats = [];
-        $todayExpireCustomers = [];
+
+        $searchId = request()->query('searchId');
 
         if ($role === 'Admin') {
             $stats['totalAgentCount'] = User::whereHas("roles", fn($q) => $q->where("name", "Agent"))->count();
@@ -41,33 +42,43 @@ class HomeController extends Controller
 
         if ($role === 'Agent') {
             $stats['totalCustomers'] = Customer::where('created_by', $user->id)->count();
-            $stats['pendingCustomers'] = CustomerService::whereHas('service', function ($query) use ($user) {
-                $query->where('agent_id', $user->id);
-            })->where('status', '1')->count();
 
-            $stats['progressCustomers'] = CustomerService::whereHas('service', function ($query) use ($user) {
-                $query->where('agent_id', $user->id);
-            })->where('status', '2')->count();
-
-            $stats['completedCustomers'] = CustomerService::whereHas('service', function ($query) use ($user) {
-                $query->where('agent_id', $user->id);
-            })->where('status', '3')->count();
-
-            // Today's expiring customer services
-            $todayExpireCustomers = CustomerService::whereHas('service', function ($query) use ($user) {
-                    $query->where('agent_id', $user->id);
+            $stats['expiringThisMonth'] = Customer::where('created_by', $user->id)
+                ->where(function ($query) use ($now) {
+                    $query->whereMonth('passport_expiry', $now->month)
+                        ->orWhereMonth('visa_expiry', $now->month)
+                        ->orWhereMonth('ci_expiry', $now->month)
+                        ->orWhereMonth('pink_card_expiry', $now->month);
                 })
-                ->whereDate('end_date', Carbon::today())
-                ->with(['customer.user', 'service'])
-                ->get();
-            
+                ->count();
+
+            $stats['newCustomersThisMonth'] = Customer::where('created_by', $user->id)
+                ->where('created_at', '>=', $startOfMonth)
+                ->count();
+
+            $stats['activeServices'] = CustomerService::whereHas('customer', function ($query) use ($user) {
+                $query->where('created_by', $user->id);
+            })->count();
+
+            if ($searchId) {
+                $stats['customerTableData'] = Customer::where('created_by', $user->id)
+                    ->where('customer_id', $searchId)
+                    ->paginate(config('common.paginate_per_page'));
+            } else {
+                $stats['customerTableData'] = Customer::where('created_by', $user->id)
+                    ->whereRaw('0 = 1') 
+                    ->paginate(config('common.paginate_per_page'));
+            }
         }
 
         return Inertia::render('Dashboard', [
             'user' => $user,
             'role' => $role,
             'stats' => $stats,
-            'todayExpireCustomers' => $todayExpireCustomers,
+            'searchId' => $searchId, 
+            'pageTitle' => 'dashboard',
         ]);
     }
+
+
 }

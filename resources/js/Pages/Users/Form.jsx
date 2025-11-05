@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
-import { FormWrapper, Label, Input, Button, Select } from '../../components';
+import { FormWrapper, Label, Input, Button } from '../../components';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translations } from '../../utils/lang';
 
-const UserForm = ({ user = null, roles = [] }) => {
+const UserForm = ({ user = null }) => {
+    const { language } = useLanguage();
+    const t = translations[language];
+
     const [formData, setFormData] = useState({
         name: user?.name || '',
         email: user?.email || '',
         password: '',
         password_confirmation: '',
-        role: user?.role || '',
     });
 
     const [errors, setErrors] = useState({});
@@ -43,32 +47,27 @@ const UserForm = ({ user = null, roles = [] }) => {
     };
 
     return (
-        <div className="m-10">
-            <h1 className="text-2xl font-bold mb-5 dark:text-white">
-                {user ? 'Edit User' : 'Add User'}
-            </h1>
+        <div className="mx-4 my-6 sm:mx-10 sm:my-10">
             <FormWrapper onSubmit={handleSubmit}>
-                
                 <div>
                     <Label htmlFor="name" required>
-                        User Name
+                        {t.name}
                     </Label>
                     <Input
                         id="name"
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Enter user name"
+                        placeholder={t.enterUserName}
                         aria-invalid={!!errors.name}
                         aria-describedby="name-error"
                         error={errors.name}
                     />
                 </div>
 
-                {/* Email Field */}
                 <div>
                     <Label htmlFor="email" required>
-                        Email
+                        {t.email}
                     </Label>
                     <Input
                         id="email"
@@ -76,17 +75,16 @@ const UserForm = ({ user = null, roles = [] }) => {
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="Enter email address"
+                        placeholder={t.enterEmail}
                         aria-invalid={!!errors.email}
                         aria-describedby="email-error"
                         error={errors.email}
                     />
                 </div>
 
-                {/* Password Field */}
                 <div>
                     <Label htmlFor="password" required>
-                        Password
+                        {t.password}
                     </Label>
                     <Input
                         id="password"
@@ -94,17 +92,16 @@ const UserForm = ({ user = null, roles = [] }) => {
                         type="password"
                         value={formData.password}
                         onChange={handleChange}
-                        placeholder="Enter password"
+                        placeholder={t.enterPassword}
                         aria-invalid={!!errors.password}
                         aria-describedby="password-error"
                         error={errors.password}
                     />
                 </div>
 
-                {/* Confirm Password Field */}
                 <div>
                     <Label htmlFor="password_confirmation" required>
-                        Confirm Password
+                        {t.confirmPassword}
                     </Label>
                     <Input
                         id="password_confirmation"
@@ -112,28 +109,10 @@ const UserForm = ({ user = null, roles = [] }) => {
                         type="password"
                         value={formData.password_confirmation}
                         onChange={handleChange}
-                        placeholder="Re-enter password"
+                        placeholder={t.reEnterPassword}
                         aria-invalid={!!errors.password_confirmation}
                         aria-describedby="password_confirmation-error"
                         error={errors.password_confirmation}
-                    />
-                </div>
-
-                {/* Role Dropdown */}
-                <div>
-                    <Label htmlFor="role" required>
-                        Role
-                    </Label>
-                    <Select
-                        id="role"
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        options={roles.map((role) => ({ label: role, value: role }))}
-                        placeholder="Select a role"
-                        aria-invalid={!!errors.role}
-                        aria-describedby="role-error"
-                        error={errors.role}
                     />
                 </div>
 
@@ -143,10 +122,10 @@ const UserForm = ({ user = null, roles = [] }) => {
                         variant="secondary"
                         disabled={processing}
                     >
-                        Cancel
+                        {t.cancel}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        {processing ? 'Saving...' : 'Save'}
+                        {processing ? t.saving : t.save}
                     </Button>
                 </div>
             </FormWrapper>

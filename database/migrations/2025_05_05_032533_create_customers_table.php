@@ -16,10 +16,21 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->index();
             $table->string('customer_id')->unique();
             $table->string('cus_id')->unique();
-            $table->string('name')->nullable();
+            $table->string('name_mm')->nullable();
+            $table->string('nationality')->nullable();
             $table->date('dob')->nullable();
-            $table->string('phone')->nullable();
-            $table->date('expired_date')->nullable();
+            $table->string('sex')->nullable();
+            $table->string('nrc_no')->nullable();
+            $table->string('passport_no')->nullable();
+            $table->date('passport_expiry')->nullable();
+            $table->string('visa_type')->nullable();
+            $table->date('visa_expiry')->nullable();
+            $table->string('ci_no')->nullable();
+            $table->date('ci_expiry')->nullable();
+            $table->string('pink_card_no')->nullable();
+            $table->date('pink_card_expiry')->nullable();
+            $table->string('phone')->nullable(); // primary phone
+            $table->string('phone_secondary')->nullable();
             $table->text('address')->nullable();
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->unsignedBigInteger('updated_by')->nullable()->index();

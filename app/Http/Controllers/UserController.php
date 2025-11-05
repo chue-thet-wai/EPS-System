@@ -14,7 +14,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::whereHas('roles', function ($query) {
-            $query->whereNotIn('name', ['Customer']);
+            $query->where('name', 'Admin');
         })->with('roles')->paginate(config('common.paginate_per_page'));
     
         foreach ($users as $user) {
@@ -23,14 +23,15 @@ class UserController extends Controller
     
         return Inertia::render('Users/Index', [
             'users' => $users,
+            'pageTitle' => 'users'
         ]);
     }
 
 
     public function create()
     {
-        return Inertia::render('Users/Form', [
-            'roles' => $this->getAvailableRoles(), 
+        return Inertia::render('Users/Form',[
+            'pageTitle' => 'createUser'
         ]);
     }
 
@@ -39,8 +40,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed', // Ensure password confirmation
-            'role' => 'required|string|in:' . implode(',', $this->getAvailableRoles()),
+            'password' => 'required|string|min:8|confirmed', 
         ]);
 
         // Create the user
@@ -51,19 +51,16 @@ class UserController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        // Sync the selected role
-        $user->syncRoles([$request->role]); // Sync the selected role
+        $user->assignRole('Admin');
 
         return redirect()->route('users.index')->with('success', 'User created successfully!');
     }
 
     public function edit(User $user)
     {
-        $user->load('roles');
-        $user->role = $user->roles->first()->name ?? null; 
         return Inertia::render('Users/Form', [
             'user' => $user,
-            'roles' => $this->getAvailableRoles(),
+            'pageTitle' => 'editUser'
         ]);
     }
 
@@ -72,8 +69,7 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'role' => 'required|string|in:' . implode(',', $this->getAvailableRoles()),
+            'password' => 'nullable|string|min:8|confirmed'
         ]);
 
         // Update the user details
@@ -89,9 +85,6 @@ class UserController extends Controller
             ]);
         }
 
-        // Sync the selected role
-        $user->syncRoles([$request->role]); 
-
         return redirect()->route('users.index')->with('success', 'User updated successfully!');
     }
 
@@ -99,10 +92,5 @@ class UserController extends Controller
     {
         $user->delete();
         return redirect()->route('users.index')->with('success', 'User deleted successfully!');
-    }
-
-    private function getAvailableRoles()
-    {
-        return Role::where('name', '!=', 'Customer')->pluck('name')->toArray();
     }
 }

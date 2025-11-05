@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('agent_id')->index();
             $table->unsignedBigInteger('category_id')->index();
             $table->string('title')->index();
-            $table->text('description')->nullable();
-            $table->text('remark')->nullable();
+            //$table->boolean('is_renew')->default(false);
+            $table->text('detail')->nullable();
+            $table->text('duration')->nullable();
+            $table->text('cost')->nullable();
             $table->tinyInteger('status')->default(1)->comment('0 :inactive , 1:active')->index();          
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->unsignedBigInteger('updated_by')->nullable()->index();
             $table->timestamps();
 
-            $table->foreign('agent_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('set null');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');

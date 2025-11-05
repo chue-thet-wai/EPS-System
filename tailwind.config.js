@@ -22,8 +22,8 @@ export default {
                 'secondary-dark-bg': '#33373E',
                 'light-gray': '#F7F7F7',
                 'half-transparent': 'rgba(243, 228, 228, 0.55)',
-                'primary-theme-color': '#6b7280',
-                'secondary-theme-color': '#9399a5',
+                'primary-theme-color': '#b0b0b0',
+                'secondary-theme-color': '#e1e1e1',
             },
             borderWidth: {
                 1: '1px',

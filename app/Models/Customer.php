@@ -20,4 +20,16 @@ class Customer extends Model
         return $this->hasMany(CustomerService::class);
     }
 
+    public function images()
+    {
+        return $this->hasOne(CustomerImage::class, 'customer_id');
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(CustomerAttachment::class);
+    }
+
+
+
 }

@@ -16,9 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('customer_id')->index();
             $table->unsignedBigInteger('service_id')->index();
             $table->integer('status')->default(1);
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->text('remark')->nullable();
+            $table->text('reject_note')->nullable();
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->unsignedBigInteger('updated_by')->nullable()->index();
             $table->timestamps();

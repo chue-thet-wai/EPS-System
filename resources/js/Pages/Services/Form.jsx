@@ -1,30 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import { FormWrapper, Label, Input, Button, Select } from '../../components';
-import ReactQuill from 'react-quill'; 
-import 'react-quill/dist/quill.snow.css'; 
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import useIsMobile from '@/utils/useIsMobile';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { translations } from '../../utils/lang';
 
-const ServiceForm = ({ service = null, users = [], categories = [], statuses = [] }) => {
+const ServiceForm = ({ service = null, categories = [], statuses = [] }) => {
+    
     const [formData, setFormData] = useState({
-        user_id: service?.user_id || '',
         category_id: service?.category_id || '',
+        subcategory_id: service?.subcategory_id || '', 
         title: service?.title || '',
-        description: service?.description || '',
-        remark: service?.remark || '',
+        detail: service?.detail || '',
+        duration: service?.duration || '',
+        cost: service?.cost || '',
         status: service?.status ?? 1,
     });
 
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
+    const [subcategories, setSubcategories] = useState([]);  // Track subcategories based on category selection
+    const isMobile = useIsMobile();
 
+    const { language } = useLanguage();
+    const t = translations[language];
+
+    // Update subcategories whenever category_id changes
+    useEffect(() => {
+        if (formData.category_id) {
+            const selectedCategory = categories.find(cat => cat.id === Number(formData.category_id));
+            
+            if (selectedCategory && selectedCategory.subcategories) {
+                setSubcategories(selectedCategory.subcategories);
+            } else {
+                setSubcategories([]);  // Reset if no subcategories
+            }
+        } else {
+            setSubcategories([]);  // Reset if no category is selected
+        }
+    }, [formData.category_id, categories]);
+
+
+    // Handle changes in input fields
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
+
+        // If category changes, update subcategories
+        if (name === 'category_id') {
+            const selectedCategory = categories.find(cat => cat.id === value);
+
+            // Set subcategories based on selected category
+            setSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+            
+            // Reset subcategory if category changes
+            setFormData((prev) => ({
+                ...prev,
+                subcategory_id: '', // Reset subcategory when category changes
+            }));
+        }
     };
 
+    // Handle changes in ReactQuill
     const handleQuillChange = (name) => (value) => {
         setFormData((prev) => ({
             ...prev,
@@ -32,16 +74,16 @@ const ServiceForm = ({ service = null, users = [], categories = [], statuses = [
         }));
     };
 
+    // Submit the form
     const handleSubmit = (e) => {
         e.preventDefault();
-
         setErrors({});
         setProcessing(true);
 
-        const action = service ? 'put' : 'post';
+        const method = service ? 'put' : 'post';
         const url = service ? `/services/${service.id}` : '/services';
 
-        Inertia[action](url, formData, {
+        Inertia[method](url, formData, {
             onError: (err) => {
                 setErrors(err);
                 setProcessing(false);
@@ -53,112 +95,260 @@ const ServiceForm = ({ service = null, users = [], categories = [], statuses = [
         });
     };
 
-    return (
-        <div className="m-10">
-            <h1 className="text-2xl font-bold mb-5 dark:text-white">
-                {service ? 'Edit Service' : 'Add Service'}
-            </h1>
-
+    // Mobile View
+    const renderMobileView = () => (
+        <div className="text-sm bg-white p-6">
             <FormWrapper onSubmit={handleSubmit}>
-                <div className="flex space-x-4">
-                    <div className="flex-1">
-                        <Label htmlFor="user_id" required>Agent</Label>
-                        <Select
-                            id="user_id"
-                            name="user_id"
-                            value={formData.user_id}
-                            onChange={handleChange}
-                            options={users.map((user) => ({
-                                value: user.id,
-                                label: user.name,
-                            }))}
-                            placeholder="Select agent"
-                            error={errors.user_id}
-                        />
-                    </div>
-
-                    <div className="flex-1">
-                        <Label htmlFor="category_id" required>Category</Label>
-                        <Select
-                            id="category_id"
-                            name="category_id"
-                            value={formData.category_id}
-                            onChange={handleChange}
-                            options={categories.map((cat) => ({
-                                value: cat.id,
-                                label: cat.name,
-                            }))}
-                            placeholder="Select a category"
-                            error={errors.category_id}
-                        />
-                    </div>
+                {/* Category Select */}
+                <div className="mb-4">
+                    <Label htmlFor="category_id" required>{t.category}</Label>
+                    <Select
+                        id="category_id"
+                        name="category_id"
+                        value={formData.category_id}
+                        onChange={handleChange}
+                        options={categories.map((cat) => ({
+                            value: cat.id,
+                            label: cat.name,
+                        }))}
+                        placeholder={t.selectCategory}
+                        error={errors.category_id}
+                        className="bg-gray-100"
+                    />
                 </div>
 
-                <div className="mt-4">
-                    <Label htmlFor="title" required>Title</Label>
+                {/* Subcategory Select */}
+                <div className="mb-4">
+                    <Label htmlFor="subcategory_id" required>{t.subcategory}</Label>
+                    <Select
+                        id="subcategory_id"
+                        name="subcategory_id"
+                        value={formData.subcategory_id}
+                        onChange={handleChange}
+                        options={subcategories.map((sub) => ({
+                            value: sub.id,
+                            label: sub.name,
+                        }))}
+                        placeholder={t.selectSubcategory}
+                        error={errors.subcategory_id}
+                        disabled={!formData.category_id || subcategories.length === 0} // Disable subcategory if no category or subcategories
+                    />
+                </div>
+
+                {/* Title Input */}
+                <div className="mb-4">
+                    <Label htmlFor="title" required>{t.title}</Label>
                     <Input
                         id="title"
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
-                        placeholder="Enter service title"
+                        placeholder={t.enterTitle}
                         error={errors.title}
+                        className="bg-gray-100"
                     />
                 </div>
 
+                {/* Detail Input */}
                 <div className="mb-4">
-                    <Label htmlFor="description" required>Description</Label>
+                    <Label htmlFor="detail">{t.detail}</Label>
                     <ReactQuill
-                        value={formData.description}
-                        onChange={handleQuillChange('description')}
+                        value={formData.detail}
+                        onChange={handleQuillChange('detail')}
                         theme="snow"
-                        className="w-full"
+                        className="w-full bg-gray-100"
                     />
-                    {errors.description && <div className="text-red-500 text-sm mt-2">{errors.description}</div>}
+                    {errors.detail && <div className="text-red-500 text-sm mt-2">{errors.detail}</div>}
                 </div>
 
+                {/* Duration Input */}
                 <div className="mb-4">
-                    <Label htmlFor="remark">Remark</Label>
-                    <ReactQuill
-                        value={formData.remark}
-                        onChange={handleQuillChange('remark')}
-                        theme="snow"
-                        className="w-full"
+                    <Label htmlFor="duration">{t.serviceDuration}</Label>
+                    <Input
+                        id="duration"
+                        name="duration"
+                        value={formData.duration}
+                        onChange={handleChange}
+                        placeholder={t.serviceDurationPlaceholder}
+                        error={errors.duration}
+                        className="bg-gray-100"
                     />
-                    {errors.remark && <div className="text-red-500 text-sm mt-2">{errors.remark}</div>}
                 </div>
 
-                <div className="mt-4">
-                    <Label htmlFor="status">Status</Label>
+                {/* Cost Input */}
+                <div className="mb-4">
+                    <Label htmlFor="cost">{t.serviceCost}</Label>
+                    <Input
+                        id="cost"
+                        name="cost"
+                        value={formData.cost}
+                        onChange={handleChange}
+                        placeholder={t.enterCost}
+                        error={errors.cost}
+                        className="bg-gray-100"
+                    />
+                </div>
+
+                {/* Status Select */}
+                <div className="mb-4">
+                    <Label htmlFor="status">{t.serviceStatus}</Label>
                     <Select
                         id="status"
                         name="status"
                         value={formData.status}
                         onChange={handleChange}
                         options={statuses.length ? statuses : [
-                            { value: 1, label: 'Active' },
-                            { value: 0, label: 'Inactive' },
+                            { value: 1, label: t.active },
+                            { value: 0, label: t.inactive },
                         ]}
-                        placeholder="Select status"
+                        placeholder={t.selectStatus}
                         error={errors.status}
+                        className="bg-gray-100"
                     />
                 </div>
 
+                {/* Submit Button */}
                 <div className="flex justify-end space-x-3 mt-6">
                     <Button
                         onClick={() => Inertia.visit('/services')}
                         variant="secondary"
                         disabled={processing}
                     >
-                        Cancel
+                        {t.cancel}
                     </Button>
                     <Button type="submit" disabled={processing}>
-                        {processing ? 'Saving...' : 'Save'}
+                        {processing ? t.saving : t.save}
                     </Button>
                 </div>
             </FormWrapper>
         </div>
     );
+
+    // Desktop View
+    const renderDesktopView = () => (
+        <div className="mx-4 my-6 sm:mx-10 sm:my-10">
+            <FormWrapper onSubmit={handleSubmit}>
+                {/* Category Select */}
+                <div className="mb-4">
+                    <Label htmlFor="category_id" required>{t.category}</Label>
+                    <Select
+                        id="category_id"
+                        name="category_id"
+                        value={formData.category_id}
+                        onChange={handleChange}
+                        options={categories.map((cat) => ({
+                            value: cat.id,
+                            label: cat.name,
+                        }))}
+                        placeholder={t.selectCategory}
+                        error={errors.category_id}
+                    />
+                </div>
+
+                {/* Subcategory Select */}
+                <div className="mb-4">
+                    <Label htmlFor="subcategory_id" required>{t.subcategory}</Label>
+                    <Select
+                        id="subcategory_id"
+                        name="subcategory_id"
+                        value={formData.subcategory_id}
+                        onChange={handleChange}
+                        options={subcategories.map((sub) => ({
+                            value: sub.id,
+                            label: sub.name,
+                        }))}
+                        placeholder={t.selectSubcategory}
+                        error={errors.subcategory_id}
+                        disabled={!formData.category_id || subcategories.length === 0} // Disable subcategory if no category or subcategories
+                    />
+                </div>
+
+                {/* Title Input */}
+                <div className="mb-4">
+                    <Label htmlFor="title" required>{t.title}</Label>
+                    <Input
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder={t.enterTitle}
+                        error={errors.title}
+                    />
+                </div>
+
+                {/* Detail Input */}
+                <div className="mb-4">
+                    <Label htmlFor="detail">{t.detail}</Label>
+                    <ReactQuill
+                        value={formData.detail}
+                        onChange={handleQuillChange('detail')}
+                        theme="snow"
+                        className="w-full"
+                    />
+                    {errors.detail && <div className="text-red-500 text-sm mt-2">{errors.detail}</div>}
+                </div>
+
+                {/* Duration Input */}
+                <div className="mb-4">
+                    <Label htmlFor="duration">{t.serviceDuration}</Label>
+                    <Input
+                        id="duration"
+                        name="duration"
+                        value={formData.duration}
+                        onChange={handleChange}
+                        placeholder={t.serviceDurationPlaceholder}
+                        error={errors.duration}
+                    />
+                </div>
+
+                {/* Cost Input */}
+                <div className="mb-4">
+                    <Label htmlFor="cost">{t.serviceCost}</Label>
+                    <Input
+                        id="cost"
+                        name="cost"
+                        value={formData.cost}
+                        onChange={handleChange}
+                        placeholder={t.enterCost}
+                        error={errors.cost}
+                    />
+                </div>
+
+                {/* Status Select */}
+                <div className="mb-4">
+                    <Label htmlFor="status">{t.serviceStatus}</Label>
+                    <Select
+                        id="status"
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        options={statuses.length ? statuses : [
+                            { value: 1, label: t.active },
+                            { value: 0, label: t.inactive },
+                        ]}
+                        placeholder={t.selectStatus}
+                        error={errors.status}
+                    />
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end space-x-3 mt-6">
+                    <Button
+                        onClick={() => Inertia.visit('/services')}
+                        variant="secondary"
+                        disabled={processing}
+                    >
+                        {t.cancel}
+                    </Button>
+                    <Button type="submit" disabled={processing}>
+                        {processing ? t.saving : t.save}
+                    </Button>
+                </div>
+            </FormWrapper>
+        </div>
+    );
+
+    return isMobile ? renderMobileView() : renderDesktopView();
 };
 
 export default ServiceForm;

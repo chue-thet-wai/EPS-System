@@ -26,6 +26,11 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'Edit Users', 'route' => 'users.edit'],
             ['name' => 'Delete Users', 'route' => 'users.destroy'],
 
+            ['name' => 'View Agents', 'route' => 'agents.index'],
+            ['name' => 'Create Agents', 'route' => 'agents.create'],
+            ['name' => 'Edit Agents', 'route' => 'agents.edit'],
+            ['name' => 'Delete Agents', 'route' => 'agents.destroy'],
+
             ['name' => 'View Services', 'route' => 'services.index'],
             ['name' => 'Create Services', 'route' => 'services.create'], 
             ['name' => 'Edit Services', 'route' => 'services.edit'],
@@ -34,14 +39,21 @@ class RolePermissionSeeder extends Seeder
             ['name' => 'View Customers', 'route' => 'customers.index'],
             ['name' => 'Create Customers', 'route' => 'customers.create'], 
             ['name' => 'Edit Customers', 'route' => 'customers.edit'],
-            ['name' => 'Delete Customers', 'route' => 'customers.destroy'],
-            ['name' => 'Export Customers', 'route' => 'customers.export'],
+           // ['name' => 'Delete Customers', 'route' => 'customers.destroy'],
+            //['name' => 'Export Customers', 'route' => 'customers.export'],
 
             ['name' => 'View Customer Services', 'route' => 'customer-services.index'],
             ['name' => 'Create Customer Services', 'route' => 'customer-services.create'], 
             ['name' => 'Edit Customer Services', 'route' => 'customer-services.edit'],
-            ['name' => 'Delete Customer Services', 'route' => 'customer-services.destroy'],
-            ['name' => 'Export Customer Services', 'route' => 'customer-services.export'],
+           // ['name' => 'Delete Customer Services', 'route' => 'customer-services.destroy'],
+            //['name' => 'Export Customer Services', 'route' => 'customer-services.export'],
+
+            ['name' => 'View Jobs', 'route' => 'jobs.index'],
+            ['name' => 'Create Jobs', 'route' => 'jobs.create'],
+            ['name' => 'Edit Jobs', 'route' => 'jobs.edit'],
+            ['name' => 'Delete Jobs', 'route' => 'jobs.destroy'],
+
+            ['name' => 'View Applicants', 'route' => 'applicants.index'],
 
         ];
 
@@ -55,9 +67,12 @@ class RolePermissionSeeder extends Seeder
 
         // Assign specific permissions to the agent role
         $adminPermissions = [
-            'View Categories', 'Create Categories', 'Edit Categories', 'Delete Categories',
+            'View Categories','Create Categories', 'Edit Categories', 'Delete Categories',
             'View Roles', 'Create Roles', 'Edit Roles', 'Delete Roles',
             'View Users', 'Create Users', 'Edit Users', 'Delete Users',
+            'View Agents', 'Create Agents', 'Edit Agents', 'Delete Agents',
+            'View Jobs', 'Create Jobs', 'Edit Jobs', 'Delete Jobs',
+            'View Applicants',
         ];
         $adminRole = Role::firstOrCreate(['name' => 'Admin']);
         $adminRole->syncPermissions($adminPermissions);
@@ -65,9 +80,8 @@ class RolePermissionSeeder extends Seeder
         // Assign specific permissions to the agent role
         $agentPermissions = [
             'View Services', 'Create Services', 'Edit Services', 'Delete Services',  
-            'View Categories', 'Create Categories', 'Edit Categories', 'Delete Categories',
-            'View Customers', 'Create Customers', 'Edit Customers', 'Delete Customers','Export Customers',
-            'View Customer Services', 'Create Customer Services', 'Edit Customer Services', 'Delete Customer Services','Export Customer Services',
+            'View Customers', 'Create Customers', 'Edit Customers',
+            'View Customer Services', 'Create Customer Services', 'Edit Customer Services',
         ];
         $agentRole = Role::firstOrCreate(['name' => 'Agent']);
         $agentRole->syncPermissions($agentPermissions);

@@ -4,10 +4,10 @@ const FormWrapper = ({
     children,
     onSubmit,
     className = '',
-    padding = 'p-6',
-    bgColor = 'bg-white dark:bg-secondary-dark-bg',
-    rounded = 'rounded-lg',
-    shadow = 'shadow-md',
+    padding = '',
+    bgColor = '',
+    rounded = '',
+    shadow = '',
     spacing = 'space-y-4',
 }) => {
     return (

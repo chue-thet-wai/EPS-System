@@ -20,4 +20,15 @@ class CustomerService extends Model
         return $this->belongsTo(Service::class);
     }
 
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function histories()
+    {
+        return $this->hasMany(CustomerServiceHistory::class);
+    }
+
+
 }

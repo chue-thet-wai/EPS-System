@@ -3,26 +3,32 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
-
-/*Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});*/
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::group(['namespace' => 'App\Http\Controllers\API'], function () {
+        Route::post('/save-profile', 'ProfileController@saveProfile');
+        Route::get('/profile', 'ProfileController@getProfile');
+
+        //Route::post('/change-password', 'AccountController@changePassword');
+
+        Route::get('/available-agents', 'AgentController@getAgentList');
+        Route::get('/agent-detail', 'AgentController@getAgentDetail');
+        
+        Route::post('/request-service', 'ServiceController@requestService');
+        
+        Route::get('/customer-services-list', 'ServiceController@customerServicesList');        
+        Route::get('/customer-service-detail', 'ServiceController@customerServiceDetail');
+
+        Route::post('/save-review', 'ReviewController@saveReview');
+
+        Route::get('/jobs', 'JobController@jobList');        
+        Route::get('/job-detail', 'JobController@jobDetail');
+        Route::post('/upload-cv', 'JobController@uploadCV');
+
     });
 });
 
 Route::group(['namespace' => 'App\Http\Controllers\API'], function () {
-   
+    Route::post('/register', 'AuthController@register');
+    Route::post('/login', 'AuthController@login');
 });
