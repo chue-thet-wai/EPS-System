@@ -54,4 +54,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Agent::class);
     }
+
+    public function services()
+    {
+        return $this->hasMany(Service::class, 'created_by');
+    }
+
 }

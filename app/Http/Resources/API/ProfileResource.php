@@ -24,6 +24,8 @@ class ProfileResource extends JsonResource
             'id'              => $this->id,
             'customer_id'     => $this->customer_id,
             'cus_id'          => $this->cus_id,
+            'firebase_token'  => $this->user->firebase_token,
+            'user_id'         => $this->user->id,
             'name'            => $this->user->name,
             'name_mm'         => $this->name_mm,
             'sex'             => $this->sex?? null,

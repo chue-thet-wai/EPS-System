@@ -16,9 +16,17 @@ use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Excel as ExcelType;
+use App\Services\NotificationService;
 
 class CustomerServiceController extends Controller
 {
+    protected $notificationService;
+
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
     public function index(Request $request)
     {
         $authUser = auth()->user();
@@ -44,8 +52,10 @@ class CustomerServiceController extends Controller
             $query->where('service_id', $request->service_id);
         }
 
-        $customerServices = $query->paginate(config('common.paginate_per_page'))
+        $customerServices = $query->orderBy('created_at','desc')
+                                ->paginate(config('common.paginate_per_page'))
                                 ->appends($request->all());
+        
 
         $statusLabels = collect(config('common.service_statuses'))->pluck('label', 'value')->all();
         foreach ($customerServices as $item) {
@@ -168,6 +178,19 @@ class CustomerServiceController extends Controller
             'changed_by' => Auth::id(),
         ]);
 
+        $user = $customer->user;
+        if ($user && $user->firebase_token) {
+
+            $title = "New Service Added";
+            $body  = "Your service request has been created.";
+
+            $this->notificationService->sendToUserByToken(
+                $user->firebase_token,
+                $title,
+                $body
+            );
+        }
+
         return redirect()->route('customer-services.index')->with('success', 'Customer service created successfully.');
     }
 
@@ -257,6 +280,22 @@ class CustomerServiceController extends Controller
                 'note' => $data['reject_note'] ?? null,
                 'changed_by' => Auth::id(),
             ]);
+            //send notification
+            $user = $customer->user;
+            if ($user && $user->firebase_token) {
+                $statusLabel = collect(config('common.service_statuses'))
+                    ->where('value', $data['status'])
+                    ->first()['label'] ?? 'Updated';
+
+                $title = "Service Status Updated";
+                $body  = "Your service status has changed to: {$statusLabel}";
+
+                $this->notificationService->sendToUserByToken(
+                    $user->firebase_token,
+                    $title,
+                    $body
+                );
+            }
         }
 
         return redirect()->route('customer-services.index')->with('success', 'Customer service updated successfully.');
@@ -293,9 +332,11 @@ class CustomerServiceController extends Controller
         $customerServices = $query->get();
 
         $statusLabels = collect(config('common.service_statuses'))->pluck('label', 'value')->all();
-        foreach ($customerServices as $item) {
+        $customerServices = $customerServices->map(function ($item) use ($statusLabels) {
             $item->status = $statusLabels[$item->status] ?? $item->status;
-        }
+            return $item;
+        });
+
 
         return Excel::download(new CustomerServicesExport($customerServices), 'customer-services.csv', ExcelType::CSV);
     }

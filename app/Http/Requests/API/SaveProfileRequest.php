@@ -24,7 +24,7 @@ class SaveProfileRequest extends BaseRequest
                 'max:255',
                 Rule::unique('users', 'email')->ignore($this->user()->id),
             ],
-
+            'sex'              => ['required', 'string', 'in:Male,Female,Other'],
             'dob'              => ['required', 'date'],
             'phone'            => ['nullable', 'string', 'max:50'],
             'phone_secondary'  => ['nullable', 'string', 'max:50'],

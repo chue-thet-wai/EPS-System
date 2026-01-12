@@ -86,7 +86,6 @@ class ServiceController extends Controller
                 return response()->json([
                     'status'  => 200,
                     'message' => 'Success',
-                    'statuses'=> config('common.service_statuses'),
                     'data'    => new CustomerServiceDetailResource($customerServiceDetail)
                 ]);
             } else {
@@ -132,17 +131,21 @@ class ServiceController extends Controller
             }
 
             //update customer data
-            $service = Service::with(['category', 'subcategory'])->find($request->service_id);
+            //$service = Service::with(['category', 'subcategory'])->find($request->service_id);
 
             $isPassport = $isVisa = $isCI = $isPinkCard = false;
 
-            if ($service && $service->category) {
+            /*if ($service && $service->category) {
                 $categoryName = strtolower($service->category->name);
                 $isPassport   = $categoryName === 'passport';
                 $isVisa       = $categoryName === 'visa';
                 $isCI         = $categoryName === 'ci';
                 $isPinkCard   = $categoryName === 'pink_card';
-            }
+            }*/
+            $isPassport = $request->type === 'passport';
+            $isVisa     = $request->type === 'visa';
+            $isCI       = $request->type === 'ci';
+            $isPinkCard = $request->type === 'pinkcard';
 
             $updateData = [
                 'cus_id'      => $request->name . "-" . $request->dob,

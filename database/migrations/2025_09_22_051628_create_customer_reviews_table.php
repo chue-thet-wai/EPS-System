@@ -15,14 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('customer_id')->index();
             $table->unsignedBigInteger('agent_id')->index(); 
-            $table->unsignedBigInteger('customer_service_id')->index();
             $table->tinyInteger('rating');
             $table->text('comment')->nullable();
             $table->timestamps();
 
             $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
             $table->foreign('agent_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('customer_service_id')->references('id')->on('customer_services')->onDelete('cascade');
         });
     }
 

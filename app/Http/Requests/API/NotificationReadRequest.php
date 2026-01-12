@@ -4,7 +4,7 @@ namespace App\Http\Requests\API;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class ReviewRequest extends FormRequest
+class NotificationReadRequest extends FormRequest
 {
     public function authorize()
     {
@@ -14,9 +14,7 @@ class ReviewRequest extends FormRequest
     public function rules()
     {
         return [
-            'agent_id' => 'required|exists:agents,id',
-            'rating'   => 'required|integer|min:1|max:5',
-            'comment'  => 'nullable|string',
+            'notification_id' => 'required|integer|exists:notifications,id',
         ];
     }
 }

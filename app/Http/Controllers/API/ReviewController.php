@@ -38,16 +38,15 @@ class ReviewController extends Controller
             }
 
             // Get customer service
-            $customerService = CustomerService::with('service.user')->findOrFail($request->customer_service_id);
+            //$customerService = CustomerService::with('service.user')->findOrFail($request->customer_service_id);
 
             // Get agent from service
-            $agentId = $customerService->service->user->id;
+            $agentId = $request->agent_id;
 
             // Create review
             $review = CustomerReview::create([
                 'customer_id' => $customer->id,
                 'agent_id' => $agentId,
-                'customer_service_id' => $customerService->id,
                 'rating' => $request->rating,
                 'comment' => $request->comment,
             ]);

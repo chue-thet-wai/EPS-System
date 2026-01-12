@@ -55,6 +55,7 @@ class ProfileController extends Controller
                 'cus_id'           => $request->name . "-" . $request->dob,
                 'phone'            => $request->phone,
                 'phone_secondary'  => $request->phone_secondary,
+                'sex'              => $request->sex,
                 'dob'              => $request->dob,
                 'nrc_no'           => $request->nrc_no,
                 'prev_passport_no' => $request->prev_passport_no,

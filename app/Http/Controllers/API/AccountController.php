@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use Exception;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\API\ChangePasswordRequest;
+use App\Http\Requests\API\SaveFirebaseTokenRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -52,6 +53,46 @@ class AccountController extends Controller
             DB::rollback();
             Log::error('Error changing password: ' . $e->getMessage());
     
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Something went wrong. Please try again later.',
+            ], 500);
+        }
+    }
+
+    
+    public function saveFirebaseToken(SaveFirebaseTokenRequest $request)
+    {
+        try {
+            $user = Auth::user();
+
+            DB::beginTransaction();
+
+            $userData = [
+                'firebase_token'  => $request->firebase_token 
+            ];
+            
+            $userUpdate = User::where('id',$user->id)->update($userData);
+            
+            if ($userUpdate) {
+                DB::commit();
+
+                return response()->json([
+                    'status'  => 200,
+                    'message' => 'Firebase Token Saved Successfully!',
+                ]);
+            } else {
+                DB::rollback();
+                return response()->json([
+                    'status'  => 402,
+                    'message' => 'Firebase Token Saved Fail!',
+                ],402);
+            }            
+
+        } catch (Exception $e) {
+            DB::rollback();
+            Log::error($e);
+
             return response()->json([
                 'status'  => 500,
                 'message' => 'Something went wrong. Please try again later.',

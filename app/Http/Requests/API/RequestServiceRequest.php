@@ -21,6 +21,7 @@ class RequestServiceRequest extends FormRequest
             'dob'          => 'required|date',
             'nationality'  => 'required|string|max:100',
             'gender'       => 'required|string',
+            'type'         => 'required|string',
             'number'       => 'required|string',
             'expiry_date'  => 'required|date',
 
